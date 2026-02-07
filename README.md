@@ -57,6 +57,9 @@ Requirements:
     cd arma3-unix-launcher
     mkdir build
     cd build
+    # Add the following to cmake command if you want the built MacOS app to be code-signed with the
+    # selected code-signing certificate:
+    #   -DCODESIGN_CERTIFICATE="<CERTIFICATE_TEAM_ID_OR_NAME>"
     cmake ..
     make
 

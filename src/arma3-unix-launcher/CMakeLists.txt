@@ -43,12 +43,28 @@ if (APPLE)
     get_filename_component(QT_BIN_DIR "${WIDGETS_LOCATION}" DIRECTORY)
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${QT_BIN_DIR}")
     
-    add_custom_command(TARGET arma3-unix-launcher POST_BUILD
-        COMMAND "${MACDEPLOYQT_EXECUTABLE}"
-            "$<TARGET_FILE_DIR:arma3-unix-launcher>/../.."
-            -always-overwrite
-        COMMENT "Running macdeployqt...")
+    # Optional code-signing certificate (empty by default)
+    set(CODESIGN_CERTIFICATE "" CACHE STRING "Code-signing certificate identity (Team ID or name). Leave empty to skip signing.")
 
+    # Build the macdeployqt command dynamically
+    set(MACDEPLOYQT_COMMAND
+        "${MACDEPLOYQT_EXECUTABLE}"
+        "$<TARGET_FILE_DIR:arma3-unix-launcher>/../.."
+        -always-overwrite
+        -verbose=2
+    )
+
+    # Add -codesign flag only if a certificate is provided
+    if (CODESIGN_CERTIFICATE)
+        list(APPEND MACDEPLOYQT_COMMAND "-codesign=${CODESIGN_CERTIFICATE}")
+    endif()
+
+    add_custom_command(TARGET arma3-unix-launcher POST_BUILD
+        COMMAND ${MACDEPLOYQT_COMMAND}
+        COMMENT "Running macdeployqt..."
+        VERBATIM
+    )
+    
     set(CPACK_GENERATOR "DragNDrop")
     include(CPack)
 
